@@ -2,6 +2,7 @@ package com.example.lab08
 
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,47 +10,85 @@ import kotlinx.coroutines.launch
 
 
 class TaskViewModel(private val dao: TaskDao) : ViewModel() {
-
-
-    // Estado para la lista de tareas
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
 
+    // Estado para el filtro
+    private val _filterState = MutableStateFlow<TaskFilter>(TaskFilter.ALL)
+    val filterState: StateFlow<TaskFilter> = _filterState
 
     init {
-        // Al inicializar, cargamos las tareas de la base de datos
+        loadTasks()
+    }
+
+    private fun loadTasks() {
         viewModelScope.launch {
-            _tasks.value = dao.getAllTasks()
+            when (_filterState.value) {
+                TaskFilter.ALL -> _tasks.value = dao.getAllTasks()
+                TaskFilter.COMPLETED -> _tasks.value = dao.getTasksByStatus(true)
+                TaskFilter.PENDING -> _tasks.value = dao.getTasksByStatus(false)
+            }
         }
     }
 
-
-    // Función para añadir una nueva tarea
     fun addTask(description: String) {
-        val newTask = Task(description = description)
         viewModelScope.launch {
-            dao.insertTask(newTask)
-            _tasks.value = dao.getAllTasks() // Recargamos la lista
+            dao.insertTask(Task(description = description))
+            loadTasks()
         }
     }
 
+    fun editTask(task: Task, newDescription: String) {
+        viewModelScope.launch {
+            val updatedTask = task.copy(description = newDescription)
+            dao.updateTask(updatedTask)
+            loadTasks()
+        }
+    }
 
-    // Función para alternar el estado de completado de una tarea
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            dao.deleteTask(task)
+            loadTasks()
+        }
+    }
+
     fun toggleTaskCompletion(task: Task) {
         viewModelScope.launch {
             val updatedTask = task.copy(isCompleted = !task.isCompleted)
             dao.updateTask(updatedTask)
-            _tasks.value = dao.getAllTasks() // Recargamos la lista
+            loadTasks()
         }
     }
 
+    fun setFilter(filter: TaskFilter) {
+        viewModelScope.launch {
+            _filterState.value = filter
+            loadTasks()
+        }
+    }
 
-    // Función para eliminar todas las tareas
     fun deleteAllTasks() {
         viewModelScope.launch {
             dao.deleteAllTasks()
-            _tasks.value = emptyList() // Vaciamos la lista en el estado
+            loadTasks()
         }
     }
 }
 
+// TaskFilter.kt
+enum class TaskFilter {
+    ALL,
+    COMPLETED,
+    PENDING
+}
+
+class TaskViewModelFactory(private val dao: TaskDao) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(TaskViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return TaskViewModel(dao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

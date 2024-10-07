@@ -14,6 +14,7 @@ lifecycleRuntimeKtxVersion = "2.7.0"
 lifecycleViewmodelCompose = "2.6.1"
 lifecycleViewmodelComposeVersion = "2.7.0"
 lifecycleViewmodelKtx = "2.7.0"
+materialIconsExtended = "1.7.3"
 roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 
@@ -24,6 +25,7 @@ androidx-lifecycle-runtime-ktx-v270 = { module = "androidx.lifecycle:lifecycle-r
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-lifecycle-viewmodel-compose-v270 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
